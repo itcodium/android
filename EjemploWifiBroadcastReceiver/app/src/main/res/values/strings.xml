@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">EjemploWifiBroadcastReceiver</string>
+
+    <string name="title_activity_wifi_broadcast_receiver">Wifi BroadcastReceiver Activity</string>
+</resources>
