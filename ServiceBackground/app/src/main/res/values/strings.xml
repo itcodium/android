@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">EjemploStartedService</string>
+
+    <string name="title_activity_bind_service">Start Service Activity</string>
+</resources>

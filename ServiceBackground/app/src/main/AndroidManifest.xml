@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="educacionit.clase7.startedservice" >
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="educacionit.clase7.startedservice.StartServiceActivity"
+            android:label="@string/title_activity_bind_service" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name="educacionit.clase7.startedservice.MyAlarmReceiver"
+            android:process=":remote" >
+        </receiver>
+
+        <service android:name="educacionit.clase7.startedservice.StartedService"/>
+        <service android:name="educacionit.clase7.startedservice.MyTestService" android:exported="false" />
+
+
+    </application>
+
+</manifest>
