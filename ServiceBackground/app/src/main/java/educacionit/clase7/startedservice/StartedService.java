@@ -17,11 +17,53 @@ import android.widget.Toast;
 /**
  * Created by ignacio on 17/08/15.
  */
+
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+
 public class StartedService extends Service {
 
     static final String TAG = "Started Service";
     private int startId;
     private Handler handler;
+    int delay = 1000 *60 * 30; // 1000= 1 seg; (1000*60)=1 min; (1000*60)*60 =1h
+
+    private void sendGet(){
+        final String url = "http://chatbot-chatbot01.7e14.starter-us-west-2.openshiftapps.com/api/newsreader";
+        com.android.volley.RequestQueue queue = Volley.newRequestQueue(this);
+                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                        new Response.Listener<JSONObject>()
+                        {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                // display response response.toString()
+                                // Toast.makeText(getApplicationContext(), "OK", Toast.LENGTH_SHORT).show();
+                                scheduleToastEvent();
+                                Log.d(TAG, response.toString());
+                            }
+                        },
+                        new Response.ErrorListener()
+                        {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                // Log.d("Error.Response");
+                                // Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).show();
+                                scheduleToastEvent();
+                                Log.v(TAG, "Servicio creado");
+                            }
+                        }
+                );
+                queue.add(getRequest);
+    }
 
     @Override
     public void onCreate() {
@@ -53,7 +95,7 @@ public class StartedService extends Service {
 
     private void scheduleToastEvent() {
         clearToastEvent(); // Clears out old instances so we don't end up with multiple toasts piling up
-        int delay = 4000; // 4 seconds
+
 
         handler.postDelayed(toastRunnable, delay);
 
@@ -80,8 +122,7 @@ public class StartedService extends Service {
         alarmManager.cancel(scheduledIntent);
     }
     private void doToastEvent() {
-        Toast.makeText(getApplicationContext(), "ding", Toast.LENGTH_SHORT).show();
-        scheduleToastEvent();
+        this.sendGet();
     }
 
     private Runnable toastRunnable = new Runnable() {
