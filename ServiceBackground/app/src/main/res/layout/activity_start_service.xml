@@ -8,6 +8,14 @@
     android:orientation="vertical"
     tools:context=".StartServiceActivity">
 
+    <TextView
+        android:id="@+id/estado"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_centerInParent="true"/>
+
+
     <Button
         android:id="@+id/iniciar"
         android:text="Iniciar servicio"
@@ -17,6 +25,12 @@
     <Button
         android:id="@+id/parar"
         android:text="Parar servicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/getUrl"
+        android:text="Get Url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

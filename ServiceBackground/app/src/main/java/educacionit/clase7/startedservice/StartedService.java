@@ -3,8 +3,12 @@ package educacionit.clase7.startedservice;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -24,60 +28,48 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-
+import android.content.IntentFilter;
 import org.json.JSONObject;
-
 import java.io.IOException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 
 
 public class StartedService extends Service {
+    private WifiBroadcastReceiver receiver=new WifiBroadcastReceiver();
+    private IntentFilter wifiFilter= new IntentFilter();
+
+    private DoGetURL pUrl=new DoGetURL();
 
     static final String TAG = "Started Service";
-    private int startId;
+    private int startId=-1;
     private Handler handler;
-    int delay = 1000 *60 * 30; // 1000= 1 seg; (1000*60)=1 min; (1000*60)*60 =1h
+    // int delay = 1000 *60 * 30; // 1000= 1 seg; (1000*60)=1 min; (1000*60)*60 =1h
+    //int delay = 1000 *60 * 2; // 1000= 1 seg; (1000*60)=1 min; (1000*60)*60 =1h
+    int delay = 1000 * 4 ; // 1000= 1 seg; (1000*60)=1 min; (1000*60)*60 =1h
 
-    private void sendGet(){
-        final String url = "http://chatbot-chatbot01.7e14.starter-us-west-2.openshiftapps.com/api/newsreader";
-        com.android.volley.RequestQueue queue = Volley.newRequestQueue(this);
-                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
-                        new Response.Listener<JSONObject>()
-                        {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                // display response response.toString()
-                                // Toast.makeText(getApplicationContext(), "OK", Toast.LENGTH_SHORT).show();
-                                scheduleToastEvent();
-                                Log.d(TAG, response.toString());
-                            }
-                        },
-                        new Response.ErrorListener()
-                        {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // Log.d("Error.Response");
-                                // Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).show();
-                                scheduleToastEvent();
-                                Log.v(TAG, "Servicio creado");
-                            }
-                        }
-                );
-                queue.add(getRequest);
-    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         handler = new Handler();
+        wifiFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         Log.v(TAG, "Servicio creado");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         this.startId = startId;
-       // Log.v(TAG, "Servicio iniciado " + " StartId " + startId);
-       // new Temporizador().execute(startId);
         scheduleToastEvent();
+        registerReceiver(receiver, wifiFilter);
+        //Log.v(TAG, "Servicio iniciado " + " StartId " + startId);
+        //Toast.makeText(this, "Init service" + Integer.toString(this.startId), Toast.LENGTH_LONG).show();
         return START_STICKY;
     }
 
@@ -90,12 +82,18 @@ public class StartedService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        this.startId = -1;
         Log.v(TAG, "Servicio destruido");
+        // scheduleToastEvent();
+        unregisterReceiver(receiver);
+        clearToastEvent();
+        Toast.makeText(this, "MyService Stopped", Toast.LENGTH_LONG).show();
     }
 
     private void scheduleToastEvent() {
-        clearToastEvent(); // Clears out old instances so we don't end up with multiple toasts piling up
+        // clearToastEvent(); // Clears out old instances so we don't end up with multiple toasts piling up
 
+        //Toast.makeText(getApplicationContext(),"Schedule Toast: "+ Integer.toString(this.startId), Toast.LENGTH_SHORT).show();
 
         handler.postDelayed(toastRunnable, delay);
 
@@ -121,8 +119,13 @@ public class StartedService extends Service {
         PendingIntent scheduledIntent = PendingIntent.getService(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.cancel(scheduledIntent);
     }
+
     private void doToastEvent() {
-        this.sendGet();
+        // this.sendGet();
+        // Toast.makeText(getApplicationContext(),Integer.toString(this.startId), Toast.LENGTH_SHORT).show();
+        //scheduleToastEvent();
+        pUrl.doGetUrl();
+
     }
 
     private Runnable toastRunnable = new Runnable() {
@@ -156,6 +159,40 @@ public class StartedService extends Service {
             Log.v(TAG, "Temporizador finalizado StartedId " + integer);
 
             //stopSelf(integer);
+        }
+    }
+
+    public class WifiBroadcastReceiver extends BroadcastReceiver {
+        private DoGetURL pUrl=new DoGetURL();
+
+        @Override
+
+        public void onReceive(Context context, Intent intent) {
+
+            if(intent.getExtras() == null){
+                return;
+            }
+
+            NetworkInfo info = intent.getExtras().getParcelable("networkInfo");
+
+            switch (info.getState()){
+                case CONNECTED:
+                    // doToastEvent();
+                    //pUrl.doGetUrl();
+                    // Toast.makeText(getApplicationContext(),"CONNECTED", Toast.LENGTH_SHORT).show();
+                    break;
+                case CONNECTING:
+                    break;
+                case DISCONNECTED:
+                    Toast.makeText(getApplicationContext(),"DISCONNECTED", Toast.LENGTH_SHORT).show();
+                    break;
+                case DISCONNECTING:;
+                    break;
+                case SUSPENDED:
+                    break;
+                default:
+            }
+
         }
     }
 }
