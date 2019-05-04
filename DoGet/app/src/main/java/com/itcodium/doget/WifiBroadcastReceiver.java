@@ -19,6 +19,7 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
         NetworkInfo info = intent.getExtras().getParcelable("networkInfo");
         switch (info.getState()){
             case CONNECTED:
+                //Toast.makeText(GlobalClass.context,"DISCONNECTED", Toast.LENGTH_SHORT).show();
                 pUrl.doGetUrl();
                 break;
             case CONNECTING:
